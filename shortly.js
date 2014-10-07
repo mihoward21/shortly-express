@@ -58,9 +58,11 @@ app.get('/signup',
 app.get('/links',
 function(req, res) {
   if(req.session.user){
+    console.log("user", req.session.user);
     Links.reset().fetch().then(function(links) {
     res.send(200, links.models);});
   } else {
+    console.log("hi there");
     res.redirect('/login');
   }
 });
@@ -113,13 +115,15 @@ app.post('/login', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
   var salt = bcrypt.genSaltSync(10);
+  console.log("salt1 is:", salt);
   var hash = bcrypt.hashSync(password, salt);
-  new User({ username: username }).fetch().then(function(found) {
+  new User({ username: username}).fetch().then(function(found) {
+
     if(found){
       req.session.user = true;
       res.redirect('/');
     } else {
-      res.redirect('/login');
+      res.redirect('/signup');
     }
   });
 });
@@ -128,7 +132,8 @@ app.post('/signup', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
   var salt = bcrypt.genSaltSync(10);
-  var hash = bcrypt.hashSync(password, salt);
+  console.log("salt2 is:", salt);
+  // var hash = bcrypt.hashSync(password, salt);
   // var userObj = db.knex('users').where({username: username});
   new User({ username: username }).fetch().then(function(found) {
     if(found){
@@ -136,7 +141,8 @@ app.post('/signup', function(req, res){
     } else {
       var user = new User({
         username: username,
-        password: hash
+        password: password,
+        salt: salt
       });
       user.save().then(function(newUser) {
         Users.add(newUser);

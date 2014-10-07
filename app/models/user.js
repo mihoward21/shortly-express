@@ -7,6 +7,7 @@ var User = db.Model.extend({
   hasTimestamps: true,
   username: null,
   password: null,
+  salt: null,
   initialize: function(){
     this.on('creating', function(model, attrs, options){
       return;
