@@ -55,22 +55,22 @@ app.get('/signup',
     res.render('signup')
   });
 
-// app.get('/links',
-// function(req, res) {
-//   if(req.session.user){
-//     Links.reset().fetch().then(function(links) {
-//     res.send(200, links.models);});
-//   } else {
-//     res.redirect('/login');
-//   }
-// });
-
 app.get('/links',
 function(req, res) {
-  Links.reset().fetch().then(function(links) {
-    res.send(200, links.models);
-  });
+  if(req.session.user){
+    Links.reset().fetch().then(function(links) {
+    res.send(200, links.models);});
+  } else {
+    res.redirect('/login');
+  }
 });
+
+// app.get('/links',
+// function(req, res) {
+//   Links.reset().fetch().then(function(links) {
+//     res.send(200, links.models);
+//   });
+// });
 
 app.post('/links',
 function(req, res) {
@@ -114,38 +114,38 @@ app.post('/login', function(req, res){
   var password = req.body.password;
   var salt = bcrypt.genSaltSync(10);
   var hash = bcrypt.hashSync(password, salt);
-  var userObj = db.knex('users').where({username: username, password: hash});
-  if(userObj){
-    req.session.regenerate(function(){
-      req.session.user = userObj.username;
-      res.redirect('/restricted');
-    })
-  } else {
-    res.redirect('/signup');
-  }
+  new User({ username: username }).fetch().then(function(found) {
+    if(found){
+      req.session.user = true;
+      res.redirect('/');
+    } else {
+      res.redirect('/login');
+    }
+  });
 });
 
 app.post('/signup', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
-
   var salt = bcrypt.genSaltSync(10);
   var hash = bcrypt.hashSync(password, salt);
-  console.log("User is",db.knex('users'));
-  var userObj = db.knex('users').where({username: username});
-  //console.log(userObj);
-  if(userObj){
-    console.log("Redirecting to signup");
-    res.redirect('/signup');
-    //alert("User already exists");
-  } else {
-    // userObj = db.user.findOne({username: username});
-    console.log("Adding new user");
-    db.knex('users').insert({username: username, password: hash});
-    res.redirect('/login');
-
-  }
-})
+  // var userObj = db.knex('users').where({username: username});
+  new User({ username: username }).fetch().then(function(found) {
+    if(found){
+      res.redirect('/signup');
+    } else {
+      var user = new User({
+        username: username,
+        password: hash
+      });
+      user.save().then(function(newUser) {
+        Users.add(newUser);
+        req.session.user = true;
+        res.redirect('/');
+      });
+    }
+  });
+});
 
 
 /************************************************************/

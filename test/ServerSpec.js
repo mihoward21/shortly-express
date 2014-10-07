@@ -63,7 +63,7 @@ describe('', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
-    xbeforeEach(function(done){      // create a user that we can then log-in with
+    beforeEach(function(done){      // create a user that we can then log-in with
       new User({
           'username': 'Phillip',
           'password': 'Phillip'
@@ -133,13 +133,13 @@ describe('', function() {
         });
       });
 
-      xit('Fetches the link url title', function (done) {
+      it('Fetches the link url title', function (done) {
         requestWithSession(options, function(error, res, body) {
           db.knex('urls')
             .where('title', '=', 'Rofl Zoo - Daily funny animal pictures')
             .then(function(urls) {
-              console.log(urls);
-              console.log(urls['0']);
+              // console.log(urls);
+              // console.log(urls['0']);
               if (urls['0'] && urls['0']['title']) {
                 var foundTitle = urls['0']['title'];
               }
@@ -230,7 +230,7 @@ describe('', function() {
       });
     });
 
-    xit('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
+    it('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
       request('http://127.0.0.1:4568/links', function(error, res, body) {
         expect(res.req.path).to.equal('/login');
         done();
@@ -255,7 +255,6 @@ describe('', function() {
         db.knex('users')
           .where('username', '=', 'Svnh')
           .then(function(res) {
-            console.log("checking the username");
             if (res[0] && res[0]['username']) {
               var user = res[0]['username'];
             }
@@ -288,7 +287,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function(){
+  describe('Account Login:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 
