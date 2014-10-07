@@ -40,10 +40,10 @@ describe('', function() {
       .del()
       .catch(function(error) {
         // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
 
     // delete user Phillip from db so it can be created later for the test
@@ -51,11 +51,11 @@ describe('', function() {
       .where('username', '=', 'Phillip')
       .del()
       .catch(function(error) {
-        // uncomment when writing authentication tests
-        // throw {
-        //   type: 'DatabaseError',
-        //   message: 'Failed to create test setup data'
-        // };
+        //uncomment when writing authentication tests
+        throw {
+          type: 'DatabaseError',
+          message: 'Failed to create test setup data'
+        };
       });
   });
 
@@ -136,14 +136,14 @@ describe('', function() {
       it('Fetches the link url title', function (done) {
         requestWithSession(options, function(error, res, body) {
           db.knex('urls')
-            .where('title', '=', 'Rofl Zoo - Daily funny animal pictures')
+            .where('title', '=', 'Funny animal pictures, funny animals, funniest dogs')
             .then(function(urls) {
-              // console.log(urls);
-              // console.log(urls['0']);
+              console.log(urls);
+              console.log(urls['0']);
               if (urls['0'] && urls['0']['title']) {
                 var foundTitle = urls['0']['title'];
               }
-              expect(foundTitle).to.equal('Rofl Zoo - Daily funny animal pictures');
+              expect(foundTitle).to.equal('Funny animal pictures, funny animals, funniest dogs');
               done();
             });
         });

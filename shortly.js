@@ -51,18 +51,16 @@ function(req, res) {
 });
 
 app.get('/signup',
-  function(req, res) {
-    res.render('signup')
-  });
+function(req, res) {
+  res.render('signup')
+});
 
 app.get('/links',
 function(req, res) {
   if(req.session.user){
-    console.log("user", req.session.user);
     Links.reset().fetch().then(function(links) {
     res.send(200, links.models);});
   } else {
-    console.log("hi there");
     res.redirect('/login');
   }
 });
@@ -114,16 +112,19 @@ function(req, res) {
 app.post('/login', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
-  var salt = bcrypt.genSaltSync(10);
-  console.log("salt1 is:", salt);
-  var hash = bcrypt.hashSync(password, salt);
-  new User({ username: username}).fetch().then(function(found) {
 
+  new User({ username: username}).fetch().then(function(found) {
     if(found){
-      req.session.user = true;
-      res.redirect('/');
+      var salt = found.get('salt');
+      var hash = bcrypt.hashSync(password, salt);
+      if(found.get('password') === hash){
+        req.session.user = true;
+        res.redirect('/');
+      } else {
+        res.redirect('/login');
+      }
     } else {
-      res.redirect('/signup');
+      res.redirect('/login');
     }
   });
 });
@@ -131,18 +132,13 @@ app.post('/login', function(req, res){
 app.post('/signup', function(req, res){
   var username = req.body.username;
   var password = req.body.password;
-  var salt = bcrypt.genSaltSync(10);
-  console.log("salt2 is:", salt);
-  // var hash = bcrypt.hashSync(password, salt);
-  // var userObj = db.knex('users').where({username: username});
   new User({ username: username }).fetch().then(function(found) {
     if(found){
       res.redirect('/signup');
     } else {
       var user = new User({
         username: username,
-        password: password,
-        salt: salt
+        password: password
       });
       user.save().then(function(newUser) {
         Users.add(newUser);
@@ -153,6 +149,11 @@ app.post('/signup', function(req, res){
   });
 });
 
+app.get('/logout',
+  function(req, res){
+    req.session.user = false;
+    res.redirect('/login');
+})
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
